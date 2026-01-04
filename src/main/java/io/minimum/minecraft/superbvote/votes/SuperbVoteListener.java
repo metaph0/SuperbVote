@@ -39,7 +39,16 @@ public class SuperbVoteListener implements Listener {
         }
 
         plugin.getServer().getAsyncScheduler().runNow(plugin, task -> {
-            OfflinePlayer op = Bukkit.getOfflinePlayer(event.getVote().getUsername());
+            String rawUsername = event.getVote().getUsername();
+            OfflinePlayer op = Bukkit.getOfflinePlayerIfCached(rawUsername);
+            if (op == null) {
+                op = Bukkit.getOfflinePlayerIfCached("." + rawUsername);
+            }
+
+            if (op == null || !op.hasPlayedBefore()) {
+                return;
+            }
+
             String worldName = null;
             if (op.isOnline()) {
                 worldName = op.getPlayer().getWorld().getName();
@@ -106,6 +115,7 @@ public class SuperbVoteListener implements Listener {
                 reward.broadcastVote(context, false, broadcast && plugin.getConfig().getBoolean("broadcast.queued") && canBroadcast && !hideBroadcast);
             }
             plugin.getQueuedVotes().addVote(vote);
+            plugin.getServer().getAsyncScheduler().runNow(plugin, task -> afterVoteProcessing());
         } else {
             if (!vote.isFakeVote() || plugin.getConfig().getBoolean("votes.process-fake-votes")) {
                 plugin.getVoteStorage().addVote(vote);
@@ -149,7 +159,7 @@ public class SuperbVoteListener implements Listener {
                     processVote(pv, voteStreak, vote, false, false, true);
                     pv = new PlayerVotes(pv.getUuid(), event.getPlayer().getName(),pv.getVotes() + 1, PlayerVotes.Type.CURRENT);
                 }
-                afterVoteProcessing();
+                // afterVoteProcessing();
             }
 
             // Remind players to vote.
