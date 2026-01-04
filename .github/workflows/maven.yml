@@ -13,19 +13,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-
-    - name: Set up JDK 17
+    - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
-        java-version: '17'
+        java-version: '21'
         distribution: 'temurin'
         cache: maven
-
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
-      
+      run: mvn clean package
+
     - name: Upload JAR artifact
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v4
       with:
         name: superbvote-jar
         path: target/*.jar
