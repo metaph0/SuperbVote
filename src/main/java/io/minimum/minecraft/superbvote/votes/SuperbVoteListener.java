@@ -39,23 +39,18 @@ public class SuperbVoteListener implements Listener {
         }
 
         plugin.getServer().getAsyncScheduler().runNow(plugin, task -> {
-            String rawUsername = event.getVote().getUsername();
-            OfflinePlayer op = Bukkit.getOfflinePlayerIfCached(rawUsername);
+            OfflinePlayer op = Bukkit.getOfflinePlayer(event.getVote().getUsername());
+
+            if (!op.hasPlayedBefore()) {
+                    op = Bukkit.getOfflinePlayer("." + event.getVote().getUsername());
+                }
             
-            if (op == null) {
-                op = Bukkit.getOfflinePlayerIfCached("." + rawUsername);
-            }
-
-            if (op == null) {
-                op = Bukkit.getOfflinePlayer(rawUsername);
-            }
-
             if (!op.hasPlayedBefore()) {
                 return;
             }
             
             String worldName = null;
-            if (op.isOnline() && op.getPlayer() != null) {
+            if (op.isOnline()) {
                 worldName = op.getPlayer().getWorld().getName();
             }
 
